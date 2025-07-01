@@ -6,7 +6,7 @@
 
 ## 🚀 배포 URL
 
-> 서비스 준비 중입니다.
+> https://eoehd1ek.github.io/Prototyping-With-AI/
 
 <br>
 
