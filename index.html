@@ -39,8 +39,14 @@
             transition: all 0.3s ease;
         }
 
-        .keyword-btn {
+        .keyword-btn,
+        .category-btn {
             transition: background-color 0.2s ease-in-out;
+        }
+
+        .category-btn-active {
+            background-color: #3B82F6;
+            color: white;
         }
     </style>
 </head>
@@ -49,11 +55,11 @@
 
     <!-- 
     Chosen Palette: Calm Neutrals (Grays, Blue accent)
-    Application Structure Plan: A tab-based Single Page Application (SPA) structure was chosen to align with the distinct user goals identified in the report. The two main tabs—'통합 검색' (for buyers) and '시세 분석' (for sellers)—provide a task-oriented navigation that is more intuitive than a linear page. This separation allows each user persona to directly access the tools they need.
+    Application Structure Plan: A tab-based SPA structure is used to separate user tasks. '통합 검색' is for focused searching. The new '둘러보기' tab is for exploratory browsing by category. '시세 분석' is for market research. This aligns the UI with distinct user intents, improving usability.
     Visualization & Content Choices: 
-    - 통합 검색: Goal: Inform/Compare. Method: Dynamic card list via HTML/JS. Interaction: Search and filter. Justification: Familiar e-commerce pattern for easy browsing.
-    - 시세 추이: Goal: Show Change. Method: Line Chart (Chart.js/Canvas). Interaction: Search triggers chart update. Justification: Best for showing price trends over time.
-    - 판매 속도 분석: Goal: Compare. Method: Bar Chart (Chart.js/Canvas). Interaction: Search triggers chart update. Justification: Ideal for comparing discrete categories (price ranges).
+    - 통합 검색: Goal: Inform/Compare. Method: Dynamic card list via HTML/JS. Interaction: Keyword search and advanced filters (price, date, status). Justification: For users with a specific item in mind.
+    - 둘러보기: Goal: Explore. Method: Dynamic card list. Interaction: Category filter buttons. Justification: For users who want to browse items without a specific goal.
+    - 시세 분석: Goal: Show Change/Compare. Method: Line/Bar Charts (Chart.js/Canvas). Interaction: Search triggers chart update. Justification: For users researching market prices.
     CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. 
     -->
 
@@ -66,6 +72,8 @@
                     <button data-view="search"
                         class="nav-btn px-4 py-2 rounded-md font-semibold text-gray-600 hover:bg-blue-100">통합
                         검색</button>
+                    <button data-view="browse"
+                        class="nav-btn px-4 py-2 rounded-md font-semibold text-gray-600 hover:bg-blue-100">둘러보기</button>
                     <button data-view="analysis"
                         class="nav-btn px-4 py-2 rounded-md font-semibold text-gray-600 hover:bg-blue-100">시세
                         분석</button>
@@ -78,7 +86,7 @@
             <div id="view-search" class="view-content">
                 <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
                     <h2 class="text-2xl font-bold mb-1">중고 매물 통합 검색</h2>
-                    <p class="text-gray-600 mb-4">여러 중고 거래 플랫폼의 매물을 한 번에 검색하여 시간을 절약하세요.</p>
+                    <p class="text-gray-600 mb-4">찾고 있는 특정 상품의 이름을 검색해보세요.</p>
                     <div class="flex flex-col sm:flex-row gap-2">
                         <input id="searchInput" type="text" placeholder="예: RTX 4080"
                             class="flex-grow p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -143,6 +151,18 @@
                 <p id="no-results" class="text-center text-gray-500 py-10 hidden">검색 결과가 없습니다. 다른 키워드로 검색해보세요.</p>
             </div>
 
+            <div id="view-browse" class="view-content hidden">
+                <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+                    <h2 class="text-2xl font-bold mb-1">카테고리 둘러보기</h2>
+                    <p class="text-gray-600 mb-4">관심있는 분야의 중고 물품들을 확인해보세요.</p>
+                    <div id="category-filters" class="flex items-center gap-2 flex-wrap">
+                    </div>
+                </div>
+                <div id="browse-results-container"
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+                <p id="no-browse-results" class="text-center text-gray-500 py-10 hidden">해당 카테고리에 상품이 없습니다.</p>
+            </div>
+
             <div id="view-analysis" class="view-content hidden">
                 <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
                     <h2 class="text-2xl font-bold mb-1">제품 시세 분석</h2>
@@ -194,6 +214,10 @@
                 <span class="text-2xl">🔍</span>
                 <span class="text-xs block">통합검색</span>
             </button>
+            <button data-view="browse" class="flex-1 nav-btn p-3 text-center text-gray-600">
+                <span class="text-2xl">🛍️</span>
+                <span class="text-xs block">둘러보기</span>
+            </button>
             <button data-view="analysis" class="flex-1 nav-btn p-3 text-center text-gray-600">
                 <span class="text-2xl">📊</span>
                 <span class="text-xs block">시세분석</span>
@@ -205,6 +229,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const views = {
                 search: document.getElementById('view-search'),
+                browse: document.getElementById('view-browse'),
                 analysis: document.getElementById('view-analysis'),
             };
 
@@ -212,48 +237,16 @@
             let currentView = 'search';
 
             const platformInfo = {
-                '중고나라': {
-                    url: 'https://cafe.naver.com/joonggonara.cafe',
-                    icon: 'https://i.namu.wiki/i/CsBfksyGOnBz_jjTsLVrYRlBtNrZvpEo5cWC-mFbcLloYy3gqAIiRalGuhdb2oPX5U4YvyYw7rP8dSEa2hE2sA.svg'
-                },
-                '번개장터': {
-                    url: 'https://m.bunjang.co.kr',
-                    icon: 'https://i.namu.wiki/i/ldV2FGANNgeqCENBxNcRhWYRZZfldDEMMaGEUNMX_tt9_jzpCcSBa0pvaKIZYpJea0gB6gSh5S5aVqWGf0cxvw.webp'
-                },
-                '당근마켓': {
-                    url: 'https://www.daangn.com/kr',
-                    icon: 'https://lf-tt4b.tiktokcdn.com/obj/i18nblog/tt4b_cms/en-US/tipdilz7wysq-6MFgksIufbe05YAtrhLAd1.png'
-                }
+                '중고나라': { url: 'https://cafe.naver.com/joonggonara.cafe', icon: 'https://i.namu.wiki/i/CsBfksyGOnBz_jjTsLVrYRlBtNrZvpEo5cWC-mFbcLloYy3gqAIiRalGuhdb2oPX5U4YvyYw7rP8dSEa2hE2sA.svg' },
+                '번개장터': { url: 'https://m.bunjang.co.kr', icon: 'https://i.namu.wiki/i/ldV2FGANNgeqCENBxNcRhWYRZZfldDEMMaGEUNMX_tt9_jzpCcSBa0pvaKIZYpJea0gB6gSh5S5aVqWGf0cxvw.webp' },
+                '당근마켓': { url: 'https://www.daangn.com/kr', icon: 'https://lf-tt4b.tiktokcdn.com/obj/i18nblog/tt4b_cms/en-US/tipdilz7wysq-6MFgksIufbe05YAtrhLAd1.png' }
             };
 
             const mockData = {
-                "rtx 4080": Array.from({ length: 15 }, (_, i) => ({
-                    id: i,
-                    title: `[미개봉] MSI 지포스 RTX 4080 게이밍 X 트리오 D6X 16GB 트라이프로져3 ${15 - i}`,
-                    price: 1250000 + i * 10000,
-                    platform: i % 3 === 0 ? '번개장터' : (i % 3 === 1 ? '중고나라' : '당근마켓'),
-                    date: new Date(new Date().setDate(new Date().getDate() - i * 2)),
-                    imageUrl: `https://sc04.alicdn.com/kf/H44e2a415211a42cab26eb6bebd3027bdg.jpg`,
-                    sold: i > 12,
-                })),
-                "아이패드 에어 5": Array.from({ length: 12 }, (_, i) => ({
-                    id: i + 15,
-                    title: `아이패드 에어 5세대 256GB 와이파이 스페이스 그레이 ${12 - i}`,
-                    price: 680000 + i * 5000,
-                    platform: i % 3 === 0 ? '당근마켓' : (i % 3 === 1 ? '번개장터' : '중고나라'),
-                    date: new Date(new Date().setDate(new Date().getDate() - i * 3)),
-                    imageUrl: `https://img.danawa.com/prod_img/500000/180/005/img/6005180_3.jpg?shrink=500:*&_v=20241216093952`,
-                    sold: i > 10,
-                })),
-                "맥북 프로": Array.from({ length: 10 }, (_, i) => ({
-                    id: i + 27,
-                    title: `Macbook Pro 14 M3 Pro 18GB/512GB 스페이스 블랙 ${10 - i}`,
-                    price: 2500000 + i * 15000,
-                    platform: i % 3 === 0 ? '중고나라' : (i % 3 === 1 ? '당근마켓' : '번개장터'),
-                    date: new Date(new Date().setDate(new Date().getDate() - i)),
-                    imageUrl: `https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mbp14-spaceblack-select-202310?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1697230830200`,
-                    sold: i > 8,
-                })),
+                "rtx 4080": Array.from({ length: 15 }, (_, i) => ({ id: i, title: `[미개봉] MSI 지포스 RTX 4080 게이밍 X 트리오 D6X 16GB 트라이프로져3 ${15 - i}`, price: 1250000 + i * 10000, platform: i % 3 === 0 ? '번개장터' : (i % 3 === 1 ? '중고나라' : '당근마켓'), date: new Date(new Date().setDate(new Date().getDate() - i * 2)), imageUrl: `https://sc04.alicdn.com/kf/H44e2a415211a42cab26eb6bebd3027bdg.jpg`, sold: i > 12, tag: '전자제품' })),
+                "아이패드 에어 5": Array.from({ length: 12 }, (_, i) => ({ id: i + 15, title: `아이패드 에어 5세대 256GB 와이파이 스페이스 그레이 ${12 - i}`, price: 680000 + i * 5000, platform: i % 3 === 0 ? '당근마켓' : (i % 3 === 1 ? '번개장터' : '중고나라'), date: new Date(new Date().setDate(new Date().getDate() - i * 3)), imageUrl: `https://img.danawa.com/prod_img/500000/180/005/img/6005180_3.jpg?shrink=500:*&_v=20241216093952`, sold: i > 10, tag: '전자제품' })),
+                "맥북 프로": Array.from({ length: 10 }, (_, i) => ({ id: i + 27, title: `Macbook Pro 14 M3 Pro 18GB/512GB 스페이스 블랙 ${10 - i}`, price: 2500000 + i * 15000, platform: i % 3 === 0 ? '중고나라' : (i % 3 === 1 ? '당근마켓' : '번개장터'), date: new Date(new Date().setDate(new Date().getDate() - i)), imageUrl: `https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mbp14-spaceblack-select-202310?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1697230830200`, sold: i > 8, tag: '전자제품' })),
+                "다이슨 청소기": Array.from({ length: 8 }, (_, i) => ({ id: i + 37, title: `다이슨 V15 디텍트 무선 청소기 ${8 - i}`, price: 850000 + i * 10000, platform: i % 3 === 0 ? '당근마켓' : (i % 3 === 1 ? '중고나라' : '번개장터'), date: new Date(new Date().setDate(new Date().getDate() - i * 4)), imageUrl: `https://image.dyson.co.kr/media/catalog/product/image/964478d/v15-detect-gold-front-facing.png`, sold: i > 6, tag: '가전제품' })),
             };
 
             const mockAnalysis = {
@@ -273,6 +266,10 @@
             const dateFilter = document.getElementById('dateFilter');
             const popularKeywordsContainer = document.getElementById('popular-keywords');
 
+            const browseResultsContainer = document.getElementById('browse-results-container');
+            const noBrowseResults = document.getElementById('no-browse-results');
+            const categoryFiltersContainer = document.getElementById('category-filters');
+
             const analysisInput = document.getElementById('analysisInput');
             const analysisBtn = document.getElementById('analysisBtn');
             const analysisResults = document.getElementById('analysis-results');
@@ -289,23 +286,19 @@
                     btn.classList.toggle('text-gray-600', btn.dataset.view !== viewName);
                     btn.classList.toggle('hover:bg-blue-100', btn.dataset.view !== viewName);
                 });
+                if (viewName === 'browse') {
+                    performBrowse();
+                }
             }
 
             function formatPrice(price) { return `${price.toLocaleString('ko-KR')}원`; }
 
-            function renderResults(results) {
-                resultsContainer.innerHTML = '';
-                noResults.classList.toggle('hidden', results.length > 0);
-                if (results.length === 0) return;
+            function renderItems(container, items, noResultsElement) {
+                container.innerHTML = '';
+                noResultsElement.classList.toggle('hidden', items.length > 0);
+                if (items.length === 0) return;
 
-                const sortValue = sortOptions.value;
-                results.sort((a, b) => {
-                    if (sortValue === 'latest') return b.date - a.date;
-                    if (sortValue === 'price_asc') return a.price - b.price;
-                    if (sortValue === 'price_desc') return b.price - a.price;
-                });
-
-                results.forEach(item => {
+                items.forEach(item => {
                     const cardLink = document.createElement('a');
                     cardLink.href = platformInfo[item.platform]?.url || '#';
                     cardLink.target = '_blank';
@@ -328,7 +321,7 @@
                             </div>
                         </div>
                     `;
-                    resultsContainer.appendChild(cardLink);
+                    container.appendChild(cardLink);
                 });
             }
 
@@ -359,7 +352,27 @@
                     results = results.filter(item => item.date >= cutoffDate);
                 }
 
-                renderResults(results);
+                const sortValue = sortOptions.value;
+                results.sort((a, b) => {
+                    if (sortValue === 'latest') return b.date - a.date;
+                    if (sortValue === 'price_asc') return a.price - b.price;
+                    if (sortValue === 'price_desc') return b.price - a.price;
+                });
+
+                renderItems(resultsContainer, results, noResults);
+            }
+
+            function performBrowse() {
+                const selectedCategory = document.querySelector('.category-btn-active')?.dataset.category || 'all';
+                let results = Object.values(mockData).flat();
+
+                if (selectedCategory !== 'all') {
+                    results = results.filter(item => item.tag === selectedCategory);
+                }
+
+                results.sort((a, b) => b.date - a.date);
+
+                renderItems(browseResultsContainer, results, noBrowseResults);
             }
 
             function performAnalysis() {
@@ -400,16 +413,40 @@
             }
 
             function renderPopularKeywords() {
-                const keywords = ["RTX 4080", "아이패드", "맥북 프로", "닌텐도 스위치", "다이슨 에어랩"];
+                const keywords = ["RTX 4080", "아이패드", "맥북 프로", "다이슨 청소기"];
+                popularKeywordsContainer.innerHTML = '<span class="text-sm font-semibold text-gray-600">인기 검색어:</span>';
                 keywords.forEach(keyword => {
                     const btn = document.createElement('button');
                     btn.className = 'keyword-btn text-sm bg-blue-100 text-blue-800 py-1 px-3 rounded-full hover:bg-blue-200';
                     btn.textContent = keyword;
-                    btn.onclick = () => {
-                        searchInput.value = keyword;
-                        performSearch();
-                    };
+                    btn.onclick = () => { searchInput.value = keyword; performSearch(); };
                     popularKeywordsContainer.appendChild(btn);
+                });
+            }
+
+            function renderCategoryFilters() {
+                const categories = ['all', '전자제품', '가전제품'];
+                categoryFiltersContainer.innerHTML = '';
+                categories.forEach(category => {
+                    const btn = document.createElement('button');
+                    btn.className = 'category-btn text-md font-semibold border py-2 px-4 rounded-full';
+                    btn.textContent = category === 'all' ? '전체' : category;
+                    btn.dataset.category = category;
+                    if (category === 'all') {
+                        btn.classList.add('category-btn-active', 'bg-blue-600', 'text-white');
+                    } else {
+                        btn.classList.add('bg-white', 'text-gray-700');
+                    }
+                    btn.onclick = () => {
+                        document.querySelectorAll('.category-btn').forEach(b => {
+                            b.classList.remove('category-btn-active', 'bg-blue-600', 'text-white');
+                            b.classList.add('bg-white', 'text-gray-700');
+                        });
+                        btn.classList.remove('bg-white', 'text-gray-700');
+                        btn.classList.add('category-btn-active', 'bg-blue-600', 'text-white');
+                        performBrowse();
+                    };
+                    categoryFiltersContainer.appendChild(btn);
                 });
             }
 
@@ -423,6 +460,7 @@
 
             switchView('search');
             renderPopularKeywords();
+            renderCategoryFilters();
             performSearch();
         });
     </script>
