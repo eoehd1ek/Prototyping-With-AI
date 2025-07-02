@@ -83,13 +83,35 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end items-center mb-4">
-                    <span class="text-sm font-medium text-gray-600 mr-2">정렬:</span>
-                    <select id="sortOptions" class="border rounded-md p-2">
-                        <option value="latest">최신순</option>
-                        <option value="price_asc">가격 낮은 순</option>
-                        <option value="price_desc">가격 높은 순</option>
-                    </select>
+                <div class="flex flex-col sm:flex-row justify-end items-center gap-x-6 gap-y-3 mb-4">
+                    <div class="flex items-center gap-x-4">
+                        <span class="text-sm font-medium text-gray-600">거래 상태:</span>
+                        <div class="flex items-center gap-x-3" id="statusFilterContainer">
+                            <label class="flex items-center gap-1 cursor-pointer">
+                                <input type="radio" name="statusFilter" value="all"
+                                    class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" checked>
+                                <span class="text-sm text-gray-700">전체</span>
+                            </label>
+                            <label class="flex items-center gap-1 cursor-pointer">
+                                <input type="radio" name="statusFilter" value="available"
+                                    class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                                <span class="text-sm text-gray-700">거래 가능</span>
+                            </label>
+                            <label class="flex items-center gap-1 cursor-pointer">
+                                <input type="radio" name="statusFilter" value="sold"
+                                    class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                                <span class="text-sm text-gray-700">거래 완료</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium text-gray-600">정렬:</span>
+                        <select id="sortOptions" class="border rounded-md p-2">
+                            <option value="latest">최신순</option>
+                            <option value="price_asc">가격 낮은 순</option>
+                            <option value="price_desc">가격 높은 순</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div id="results-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -224,6 +246,7 @@
             const resultsContainer = document.getElementById('results-container');
             const noResults = document.getElementById('no-results');
             const sortOptions = document.getElementById('sortOptions');
+            const statusFilters = document.querySelectorAll('input[name="statusFilter"]');
 
             const analysisInput = document.getElementById('analysisInput');
             const analysisBtn = document.getElementById('analysisBtn');
@@ -296,14 +319,21 @@
 
             function performSearch() {
                 const query = searchInput.value.toLowerCase();
-                if (!query) {
-                    renderResults(Object.values(mockData).flat());
-                    return;
+                const statusFilterValue = document.querySelector('input[name="statusFilter"]:checked').value;
+
+                let results = Object.values(mockData).flat();
+
+                if (query) {
+                    results = results.filter(item => item.title.toLowerCase().includes(query));
                 }
 
-                const allItems = Object.values(mockData).flat();
-                const filteredResults = allItems.filter(item => item.title.toLowerCase().includes(query));
-                renderResults(filteredResults);
+                if (statusFilterValue === 'available') {
+                    results = results.filter(item => !item.sold);
+                } else if (statusFilterValue === 'sold') {
+                    results = results.filter(item => item.sold);
+                }
+
+                renderResults(results);
             }
 
             function performAnalysis() {
@@ -380,6 +410,7 @@
             searchBtn.addEventListener('click', performSearch);
             searchInput.addEventListener('keyup', e => { if (e.key === 'Enter') performSearch() });
             sortOptions.addEventListener('change', performSearch);
+            statusFilters.forEach(filter => filter.addEventListener('change', performSearch));
             analysisBtn.addEventListener('click', performAnalysis);
             analysisInput.addEventListener('keyup', e => { if (e.key === 'Enter') performAnalysis() });
 
