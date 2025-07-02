@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,22 +9,55 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
-        body { font-family: 'Noto Sans KR', sans-serif; }
-        .chart-container { position: relative; width: 100%; max-width: 700px; margin-left: auto; margin-right: auto; height: 320px; max-height: 40vh; }
-        @media (min-width: 768px) { .chart-container { height: 400px; } }
-        .nav-btn-active { background-color: #3B82F6; color: white; }
-        .nav-btn { transition: all 0.3s ease; }
-        .chat-bubble-user { background-color: #3B82F6; color: white; }
-        .chat-bubble-bot { background-color: #E5E7EB; color: #1F2937; }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 40vh;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        .nav-btn-active {
+            background-color: #3B82F6;
+            color: white;
+        }
+
+        .nav-btn {
+            transition: all 0.3s ease;
+        }
+
+        .chat-bubble-user {
+            background-color: #3B82F6;
+            color: white;
+        }
+
+        .chat-bubble-bot {
+            background-color: #E5E7EB;
+            color: #1F2937;
+        }
     </style>
 </head>
+
 <body class="bg-gray-50 text-gray-800">
 
     <!-- 
     Chosen Palette: Calm Neutrals (Grays, Blue accent)
     Application Structure Plan: A tab-based Single Page Application (SPA) structure was chosen to align with the distinct user goals identified in the report. The three main tabs—'통합 검색' (for buyers), '시세 분석' (for sellers), and '시세 챗봇' (for beginners)—provide a task-oriented navigation that is more intuitive than a linear page. This separation allows each user persona to directly access the tools they need without being cluttered by irrelevant functions, leading to a more efficient and user-friendly experience.
     Visualization & Content Choices: 
-    - 통합 검색: Goal: Inform/Compare. Method: Dynamic card list via HTML/JS. Interaction: Search and filter. Justification: Familiar e-commerce pattern for easy Browse.
+    - 통합 검색: Goal: Inform/Compare. Method: Dynamic card list via HTML/JS. Interaction: Search and filter. Justification: Familiar e-commerce pattern for easy browsing.
     - 시세 추이: Goal: Show Change. Method: Line Chart (Chart.js/Canvas). Interaction: Search triggers chart update. Justification: Best for showing price trends over time.
     - 판매 속도 분석: Goal: Compare. Method: Bar Chart (Chart.js/Canvas). Interaction: Search triggers chart update. Justification: Ideal for comparing discrete categories (price ranges).
     - 시세 챗봇: Goal: Inform quickly. Method: Simulated chat interface (HTML/JS). Interaction: Keyword-based responses. Justification: Lowers the barrier for novice users needing quick answers.
@@ -36,22 +70,30 @@
             <div class="container mx-auto px-4 py-4 flex justify-between items-center">
                 <h1 class="text-2xl font-bold text-blue-600">모아마켓 📈</h1>
                 <nav class="hidden md:flex space-x-2">
-                    <button data-view="search" class="nav-btn px-4 py-2 rounded-md font-semibold text-gray-600 hover:bg-blue-100">통합 검색</button>
-                    <button data-view="analysis" class="nav-btn px-4 py-2 rounded-md font-semibold text-gray-600 hover:bg-blue-100">시세 분석</button>
-                    <button data-view="chatbot" class="nav-btn px-4 py-2 rounded-md font-semibold text-gray-600 hover:bg-blue-100">시세 챗봇</button>
+                    <button data-view="search"
+                        class="nav-btn px-4 py-2 rounded-md font-semibold text-gray-600 hover:bg-blue-100">통합
+                        검색</button>
+                    <button data-view="analysis"
+                        class="nav-btn px-4 py-2 rounded-md font-semibold text-gray-600 hover:bg-blue-100">시세
+                        분석</button>
+                    <button data-view="chatbot"
+                        class="nav-btn px-4 py-2 rounded-md font-semibold text-gray-600 hover:bg-blue-100">시세
+                        챗봇</button>
                 </nav>
             </div>
         </header>
 
         <main class="flex-grow container mx-auto p-4 md:p-8">
-            
+
             <div id="view-search" class="view-content">
                 <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
                     <h2 class="text-2xl font-bold mb-1">중고 매물 통합 검색</h2>
                     <p class="text-gray-600 mb-4">여러 중고 거래 플랫폼의 매물을 한 번에 검색하여 시간을 절약하세요. 구매를 원하는 제품을 찾아보세요.</p>
                     <div class="flex flex-col sm:flex-row gap-2">
-                        <input id="searchInput" type="text" placeholder="예: RTX 4080" class="flex-grow p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <button id="searchBtn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-md hover:bg-blue-700 transition">검색</button>
+                        <input id="searchInput" type="text" placeholder="예: RTX 4080"
+                            class="flex-grow p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <button id="searchBtn"
+                            class="bg-blue-600 text-white font-bold py-3 px-6 rounded-md hover:bg-blue-700 transition">검색</button>
                     </div>
                 </div>
 
@@ -63,19 +105,21 @@
                         <option value="price_desc">가격 높은 순</option>
                     </select>
                 </div>
-                
+
                 <div id="results-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 </div>
-                 <p id="no-results" class="text-center text-gray-500 py-10 hidden">검색 결과가 없습니다. 다른 키워드로 검색해보세요.</p>
+                <p id="no-results" class="text-center text-gray-500 py-10 hidden">검색 결과가 없습니다. 다른 키워드로 검색해보세요.</p>
             </div>
 
             <div id="view-analysis" class="view-content hidden">
-                 <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
                     <h2 class="text-2xl font-bold mb-1">제품 시세 분석</h2>
                     <p class="text-gray-600 mb-4">판매하려는 제품의 현재 시세와 과거 추이, 가격대별 판매 속도를 분석하여 합리적인 판매가를 책정하세요.</p>
                     <div class="flex flex-col sm:flex-row gap-2">
-                         <input id="analysisInput" type="text" placeholder="분석할 제품명 입력 (예: 아이패드 에어 5)" class="flex-grow p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                         <button id="analysisBtn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-md hover:bg-blue-700 transition">분석하기</button>
+                        <input id="analysisInput" type="text" placeholder="분석할 제품명 입력 (예: 아이패드 에어 5)"
+                            class="flex-grow p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <button id="analysisBtn"
+                            class="bg-blue-600 text-white font-bold py-3 px-6 rounded-md hover:bg-blue-700 transition">분석하기</button>
                     </div>
                 </div>
 
@@ -87,15 +131,16 @@
                                 <canvas id="priceTrendChart"></canvas>
                             </div>
                         </div>
-                         <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm flex flex-col">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm flex flex-col">
                             <h3 class="text-xl font-bold mb-4">핵심 정보</h3>
-                            <div id="price-summary" class="space-y-4 text-center flex-grow flex flex-col justify-center">
+                            <div id="price-summary"
+                                class="space-y-4 text-center flex-grow flex flex-col justify-center">
                             </div>
                         </div>
                     </div>
                     <div class="mt-6 bg-white p-6 rounded-lg shadow-sm">
                         <h3 class="text-xl font-bold mb-4">가격대별 평균 판매 소요 기간</h3>
-                         <div class="chart-container">
+                        <div class="chart-container">
                             <canvas id="salesSpeedChart"></canvas>
                         </div>
                     </div>
@@ -104,28 +149,34 @@
             </div>
 
             <div id="view-chatbot" class="view-content hidden">
-                 <div class="bg-white p-6 rounded-lg shadow-sm">
-                     <h2 class="text-2xl font-bold mb-1">시세 조회 챗봇</h2>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold mb-1">시세 조회 챗봇</h2>
                     <p class="text-gray-600 mb-4">중고 거래가 처음이신가요? 챗봇에게 물어보면 쉽고 빠르게 원하는 제품의 시세를 알려드려요.</p>
                     <div class="w-full max-w-2xl mx-auto bg-white rounded-lg shadow-sm">
                         <div id="chat-window" class="h-96 overflow-y-auto p-4 space-y-4">
                         </div>
                         <div class="p-4 border-t">
                             <div class="flex items-center space-x-2 mb-2">
-                                <button class="quick-reply-btn text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 py-1 px-3 rounded-full">RTX 4080 시세</button>
-                                <button class="quick-reply-btn text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 py-1 px-3 rounded-full">아이패드 시세</button>
+                                <button
+                                    class="quick-reply-btn text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 py-1 px-3 rounded-full">RTX
+                                    4080 시세</button>
+                                <button
+                                    class="quick-reply-btn text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 py-1 px-3 rounded-full">아이패드
+                                    시세</button>
                             </div>
                             <form id="chat-form" class="flex gap-2">
-                                <input id="chatInput" type="text" placeholder="메시지를 입력하세요..." class="flex-grow p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                                <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-5 rounded-md hover:bg-blue-700 transition">전송</button>
+                                <input id="chatInput" type="text" placeholder="메시지를 입력하세요..."
+                                    class="flex-grow p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <button type="submit"
+                                    class="bg-blue-600 text-white font-bold py-3 px-5 rounded-md hover:bg-blue-700 transition">전송</button>
                             </form>
                         </div>
                     </div>
-                 </div>
+                </div>
             </div>
 
         </main>
-        
+
         <footer class="bg-white mt-8 py-4 border-t">
             <div class="container mx-auto px-4 text-center text-gray-500">
                 <p>&copy; 2025 모아마켓. All rights reserved.</p>
@@ -163,20 +214,20 @@
             const mockData = {
                 "rtx 4080": Array.from({ length: 15 }, (_, i) => ({
                     id: i,
-                    title: `[미개봉] MSI 지포스 RTX 4080 게이밍 X 트리오 D6X 16GB 트라이프로져3 ${15-i}`,
+                    title: `[미개봉] MSI 지포스 RTX 4080 게이밍 X 트리오 D6X 16GB 트라이프로져3 ${15 - i}`,
                     price: 1250000 + i * 10000,
                     platform: i % 3 === 0 ? '번개장터' : (i % 3 === 1 ? '중고나라' : '당근마켓'),
-                    date: new Date(2025, 6, 1 - Math.floor(i/2)),
-                    imageUrl: `https://placehold.co/600x400/3B82F6/FFFFFF?text=RTX+4080`,
+                    date: new Date(2025, 6, 1 - Math.floor(i / 2)),
+                    imageUrl: `https://sc04.alicdn.com/kf/H44e2a415211a42cab26eb6bebd3027bdg.jpg`,
                     sold: i > 12,
                 })),
                 "아이패드 에어 5": Array.from({ length: 12 }, (_, i) => ({
                     id: i + 15,
-                    title: `아이패드 에어 5세대 256GB 와이파이 스페이스 그레이 ${12-i}`,
+                    title: `아이패드 에어 5세대 256GB 와이파이 스페이스 그레이 ${12 - i}`,
                     price: 680000 + i * 5000,
                     platform: i % 3 === 0 ? '당근마켓' : (i % 3 === 1 ? '번개장터' : '중고나라'),
-                    date: new Date(2025, 6, 1 - Math.floor(i/3)),
-                    imageUrl: `https://placehold.co/600x400/60A5FA/FFFFFF?text=iPad+Air`,
+                    date: new Date(2025, 6, 1 - Math.floor(i / 3)),
+                    imageUrl: `https://img.danawa.com/prod_img/500000/180/005/img/6005180_3.jpg?shrink=500:*&_v=20241216093952`,
                     sold: i > 10,
                 })),
             };
@@ -213,7 +264,7 @@
                     }
                 }
             };
-            
+
             const searchInput = document.getElementById('searchInput');
             const searchBtn = document.getElementById('searchBtn');
             const resultsContainer = document.getElementById('results-container');
@@ -230,7 +281,7 @@
             function switchView(viewName) {
                 currentView = viewName;
                 Object.values(views).forEach(v => v.classList.add('hidden'));
-                if(views[viewName]) {
+                if (views[viewName]) {
                     views[viewName].classList.remove('hidden');
                 }
                 navButtons.forEach(btn => {
@@ -270,7 +321,7 @@
                     card.className = `bg-white rounded-lg shadow-sm overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 ${item.sold ? 'opacity-50' : ''}`;
                     card.innerHTML = `
                         <div class="relative">
-                            <img src="${item.imageUrl}&text=${encodeURIComponent(item.title.substring(0,10))}" alt="${item.title}" class="w-full h-48 object-cover">
+                            <img src="${item.imageUrl}" alt="${item.title}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/FFFFFF?text=Image+Not+Found';">
                             ${item.sold ? '<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center"><span class="text-white text-xl font-bold">거래완료</span></div>' : ''}
                         </div>
                         <div class="p-4">
@@ -288,14 +339,14 @@
                     resultsContainer.appendChild(card);
                 });
             }
-            
+
             function performSearch() {
                 const query = searchInput.value.toLowerCase();
                 if (!query) {
                     renderResults(Object.values(mockData).flat());
                     return;
                 }
-                
+
                 const allItems = Object.values(mockData).flat();
                 const filteredResults = allItems.filter(item => item.title.toLowerCase().includes(query));
                 renderResults(filteredResults);
@@ -314,7 +365,7 @@
                     noAnalysisResults.textContent = `'${query}'에 대한 분석 데이터가 없습니다. 'RTX 4080' 또는 '아이패드 에어 5'로 시도해보세요.`;
                 }
             }
-            
+
             function renderAnalysis(data) {
                 const summaryContainer = document.getElementById('price-summary');
                 summaryContainer.innerHTML = `
@@ -361,8 +412,8 @@
                             borderRadius: 5,
                         }]
                     },
-                     options: { 
-                        responsive: true, 
+                    options: {
+                        responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
                             legend: { display: false }
@@ -375,7 +426,7 @@
             const chatForm = document.getElementById('chat-form');
             const chatInput = document.getElementById('chatInput');
             const quickReplyBtns = document.querySelectorAll('.quick-reply-btn');
-            
+
             function addChatMessage(message, sender) {
                 const bubble = document.createElement('div');
                 bubble.classList.add('max-w-[80%]', 'p-3', 'rounded-lg', 'break-words');
@@ -394,7 +445,7 @@
                 if (lowerInput.includes('rtx 4080')) {
                     return "RTX 4080 모델은 현재 A급 기준 125만원 ~ 135만원 사이에 거래되고 있어요! 좋은 매물을 찾아보세요.";
                 } else if (lowerInput.includes('아이패드')) {
-                     return "아이패드 에어 5세대 256GB WiFi 모델의 경우, 현재 A급 기준 68만원 ~ 75만원 사이에 거래가 활발합니다.";
+                    return "아이패드 에어 5세대 256GB WiFi 모델의 경우, 현재 A급 기준 68만원 ~ 75만원 사이에 거래가 활발합니다.";
                 } else if (lowerInput.includes('안녕')) {
                     return "안녕하세요! 어떤 제품의 시세가 궁금하신가요?";
                 }
@@ -407,13 +458,13 @@
                 if (!userInput) return;
                 addChatMessage(userInput, 'user');
                 chatInput.value = '';
-                
+
                 setTimeout(() => {
                     const botResponse = getChatbotResponse(userInput);
                     addChatMessage(botResponse, 'bot');
                 }, 800);
             });
-            
+
             quickReplyBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const query = btn.textContent;
@@ -436,4 +487,5 @@
         });
     </script>
 </body>
+
 </html>
