@@ -318,12 +318,12 @@
                         </div>
                         <div class="p-4 flex flex-col h-full">
                             <h3 class="font-bold text-md truncate">${item.title}</h3>
-                            <p class="text-lg font-semibold text-blue-600 my-1">${formatPrice(item.price)}</p>
-                            <div class="text-sm text-gray-500 flex justify-between items-center mt-auto pt-2">
-                                <div class="flex items-center gap-2">
-                                    <img src="${platformInfo[item.platform]?.icon || ''}" class="w-4 h-4 object-contain">
-                                    <span>${item.platform}</span>
-                                </div>
+                            <div class="flex items-center gap-2 text-sm text-gray-600 my-2">
+                                <img src="${platformInfo[item.platform]?.icon || ''}" class="w-4 h-4 object-contain">
+                                <span>${item.platform}</span>
+                            </div>
+                            <p class="text-lg font-semibold text-blue-600">${formatPrice(item.price)}</p>
+                            <div class="mt-auto pt-2 text-right text-sm text-gray-500">
                                 <span>${item.date.toLocaleDateString('ko-KR')}</span>
                             </div>
                         </div>
