@@ -38,6 +38,10 @@
         .nav-btn {
             transition: all 0.3s ease;
         }
+
+        .keyword-btn {
+            transition: background-color 0.2s ease-in-out;
+        }
     </style>
 </head>
 
@@ -74,44 +78,64 @@
             <div id="view-search" class="view-content">
                 <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
                     <h2 class="text-2xl font-bold mb-1">중고 매물 통합 검색</h2>
-                    <p class="text-gray-600 mb-4">여러 중고 거래 플랫폼의 매물을 한 번에 검색하여 시간을 절약하세요. 구매를 원하는 제품을 찾아보세요.</p>
+                    <p class="text-gray-600 mb-4">여러 중고 거래 플랫폼의 매물을 한 번에 검색하여 시간을 절약하세요.</p>
                     <div class="flex flex-col sm:flex-row gap-2">
                         <input id="searchInput" type="text" placeholder="예: RTX 4080"
                             class="flex-grow p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <button id="searchBtn"
                             class="bg-blue-600 text-white font-bold py-3 px-6 rounded-md hover:bg-blue-700 transition">검색</button>
                     </div>
+                    <div id="popular-keywords" class="mt-4 flex items-center gap-2 flex-wrap">
+                        <span class="text-sm font-semibold text-gray-600">인기 검색어:</span>
+                    </div>
                 </div>
 
-                <div class="flex flex-col sm:flex-row justify-end items-center gap-x-6 gap-y-3 mb-4">
-                    <div class="flex items-center gap-x-4">
-                        <span class="text-sm font-medium text-gray-600">거래 상태:</span>
-                        <div class="flex items-center gap-x-3" id="statusFilterContainer">
-                            <label class="flex items-center gap-1 cursor-pointer">
-                                <input type="radio" name="statusFilter" value="all"
-                                    class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" checked>
-                                <span class="text-sm text-gray-700">전체</span>
-                            </label>
-                            <label class="flex items-center gap-1 cursor-pointer">
-                                <input type="radio" name="statusFilter" value="available"
-                                    class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
-                                <span class="text-sm text-gray-700">거래 가능</span>
-                            </label>
-                            <label class="flex items-center gap-1 cursor-pointer">
-                                <input type="radio" name="statusFilter" value="sold"
-                                    class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
-                                <span class="text-sm text-gray-700">거래 완료</span>
-                            </label>
+                <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+                    <h3 class="text-lg font-bold mb-4">상세 필터</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">가격 범위 (원)</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="minPrice" placeholder="최소"
+                                    class="w-full p-2 border rounded-md">
+                                <span class="text-gray-500">-</span>
+                                <input type="number" id="maxPrice" placeholder="최대"
+                                    class="w-full p-2 border rounded-md">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="dateFilter" class="block text-sm font-medium text-gray-700 mb-1">포스팅 날짜</label>
+                            <select id="dateFilter" class="w-full p-2 border rounded-md bg-white">
+                                <option value="all">전체 기간</option>
+                                <option value="1">하루 이내</option>
+                                <option value="7">일주일 이내</option>
+                                <option value="30">한달 이내</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">거래 상태</label>
+                            <div class="flex items-center gap-x-4 pt-2" id="statusFilterContainer">
+                                <label class="flex items-center gap-1 cursor-pointer"><input type="radio"
+                                        name="statusFilter" value="all" class="h-4 w-4 text-blue-600" checked><span
+                                        class="text-sm">전체</span></label>
+                                <label class="flex items-center gap-1 cursor-pointer"><input type="radio"
+                                        name="statusFilter" value="available" class="h-4 w-4 text-blue-600"><span
+                                        class="text-sm">거래 가능</span></label>
+                                <label class="flex items-center gap-1 cursor-pointer"><input type="radio"
+                                        name="statusFilter" value="sold" class="h-4 w-4 text-blue-600"><span
+                                        class="text-sm">거래 완료</span></label>
+                            </div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium text-gray-600">정렬:</span>
-                        <select id="sortOptions" class="border rounded-md p-2">
-                            <option value="latest">최신순</option>
-                            <option value="price_asc">가격 낮은 순</option>
-                            <option value="price_desc">가격 높은 순</option>
-                        </select>
-                    </div>
+                </div>
+
+                <div class="flex justify-end items-center mb-4">
+                    <span class="text-sm font-medium text-gray-600 mr-2">정렬:</span>
+                    <select id="sortOptions" class="border rounded-md p-2 bg-white">
+                        <option value="latest">최신순</option>
+                        <option value="price_asc">가격 낮은 순</option>
+                        <option value="price_desc">가격 높은 순</option>
+                    </select>
                 </div>
 
                 <div id="results-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -187,13 +211,28 @@
             const navButtons = document.querySelectorAll('.nav-btn');
             let currentView = 'search';
 
+            const platformInfo = {
+                '중고나라': {
+                    url: 'https://cafe.naver.com/joonggonara.cafe',
+                    icon: 'https://i.namu.wiki/i/CsBfksyGOnBz_jjTsLVrYRlBtNrZvpEo5cWC-mFbcLloYy3gqAIiRalGuhdb2oPX5U4YvyYw7rP8dSEa2hE2sA.svg'
+                },
+                '번개장터': {
+                    url: 'https://m.bunjang.co.kr',
+                    icon: 'https://i.namu.wiki/i/ldV2FGANNgeqCENBxNcRhWYRZZfldDEMMaGEUNMX_tt9_jzpCcSBa0pvaKIZYpJea0gB6gSh5S5aVqWGf0cxvw.webp'
+                },
+                '당근마켓': {
+                    url: 'https://www.daangn.com/kr',
+                    icon: 'https://lf-tt4b.tiktokcdn.com/obj/i18nblog/tt4b_cms/en-US/tipdilz7wysq-6MFgksIufbe05YAtrhLAd1.png'
+                }
+            };
+
             const mockData = {
                 "rtx 4080": Array.from({ length: 15 }, (_, i) => ({
                     id: i,
                     title: `[미개봉] MSI 지포스 RTX 4080 게이밍 X 트리오 D6X 16GB 트라이프로져3 ${15 - i}`,
                     price: 1250000 + i * 10000,
                     platform: i % 3 === 0 ? '번개장터' : (i % 3 === 1 ? '중고나라' : '당근마켓'),
-                    date: new Date(2025, 6, 1 - Math.floor(i / 2)),
+                    date: new Date(new Date().setDate(new Date().getDate() - i * 2)),
                     imageUrl: `https://sc04.alicdn.com/kf/H44e2a415211a42cab26eb6bebd3027bdg.jpg`,
                     sold: i > 12,
                 })),
@@ -202,43 +241,25 @@
                     title: `아이패드 에어 5세대 256GB 와이파이 스페이스 그레이 ${12 - i}`,
                     price: 680000 + i * 5000,
                     platform: i % 3 === 0 ? '당근마켓' : (i % 3 === 1 ? '번개장터' : '중고나라'),
-                    date: new Date(2025, 6, 1 - Math.floor(i / 3)),
+                    date: new Date(new Date().setDate(new Date().getDate() - i * 3)),
                     imageUrl: `https://img.danawa.com/prod_img/500000/180/005/img/6005180_3.jpg?shrink=500:*&_v=20241216093952`,
                     sold: i > 10,
+                })),
+                "맥북 프로": Array.from({ length: 10 }, (_, i) => ({
+                    id: i + 27,
+                    title: `Macbook Pro 14 M3 Pro 18GB/512GB 스페이스 블랙 ${10 - i}`,
+                    price: 2500000 + i * 15000,
+                    platform: i % 3 === 0 ? '중고나라' : (i % 3 === 1 ? '당근마켓' : '번개장터'),
+                    date: new Date(new Date().setDate(new Date().getDate() - i)),
+                    imageUrl: `https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mbp14-spaceblack-select-202310?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1697230830200`,
+                    sold: i > 8,
                 })),
             };
 
             const mockAnalysis = {
-                "rtx 4080": {
-                    summary: {
-                        newPrice: 1650000,
-                        avgPrice: 1285000,
-                        depreciation: 22.1
-                    },
-                    trend: {
-                        labels: ["4월", "5월", "6월", "7월"],
-                        data: [1350000, 1320000, 1290000, 1285000]
-                    },
-                    speed: {
-                        labels: ["110만원대", "120만원대", "130만원대", "140만원대 이상"],
-                        data: [2, 4, 9, 15]
-                    }
-                },
-                "아이패드 에어 5": {
-                    summary: {
-                        newPrice: 999000,
-                        avgPrice: 715000,
-                        depreciation: 28.4
-                    },
-                    trend: {
-                        labels: ["4월", "5월", "6월", "7월"],
-                        data: [780000, 750000, 730000, 715000]
-                    },
-                    speed: {
-                        labels: ["60만원대", "70만원대", "80만원대"],
-                        data: [3, 7, 12]
-                    }
-                }
+                "rtx 4080": { summary: { newPrice: 1650000, avgPrice: 1285000, depreciation: 22.1 }, trend: { labels: ["4월", "5월", "6월", "7월"], data: [1350000, 1320000, 1290000, 1285000] }, speed: { labels: ["110만원대", "120만원대", "130만원대", "140만원대 이상"], data: [2, 4, 9, 15] } },
+                "아이패드 에어 5": { summary: { newPrice: 999000, avgPrice: 715000, depreciation: 28.4 }, trend: { labels: ["4월", "5월", "6월", "7월"], data: [780000, 750000, 730000, 715000] }, speed: { labels: ["60만원대", "70만원대", "80만원대"], data: [3, 7, 12] } },
+                "맥북 프로": { summary: { newPrice: 3290000, avgPrice: 2650000, depreciation: 19.4 }, trend: { labels: ["4월", "5월", "6월", "7월"], data: [2800000, 2750000, 2700000, 2650000] }, speed: { labels: ["250만원대", "260만원대", "270만원대 이상"], data: [5, 9, 14] } }
             };
 
             const searchInput = document.getElementById('searchInput');
@@ -247,6 +268,10 @@
             const noResults = document.getElementById('no-results');
             const sortOptions = document.getElementById('sortOptions');
             const statusFilters = document.querySelectorAll('input[name="statusFilter"]');
+            const minPriceInput = document.getElementById('minPrice');
+            const maxPriceInput = document.getElementById('maxPrice');
+            const dateFilter = document.getElementById('dateFilter');
+            const popularKeywordsContainer = document.getElementById('popular-keywords');
 
             const analysisInput = document.getElementById('analysisInput');
             const analysisBtn = document.getElementById('analysisBtn');
@@ -258,68 +283,61 @@
             function switchView(viewName) {
                 currentView = viewName;
                 Object.values(views).forEach(v => v.classList.add('hidden'));
-                if (views[viewName]) {
-                    views[viewName].classList.remove('hidden');
-                }
+                if (views[viewName]) views[viewName].classList.remove('hidden');
                 navButtons.forEach(btn => {
-                    if (btn.dataset.view === viewName) {
-                        btn.classList.add('nav-btn-active');
-                        btn.classList.remove('text-gray-600', 'hover:bg-blue-100');
-                    } else {
-                        btn.classList.remove('nav-btn-active');
-                        btn.classList.add('text-gray-600', 'hover:bg-blue-100');
-                    }
+                    btn.classList.toggle('nav-btn-active', btn.dataset.view === viewName);
+                    btn.classList.toggle('text-gray-600', btn.dataset.view !== viewName);
+                    btn.classList.toggle('hover:bg-blue-100', btn.dataset.view !== viewName);
                 });
             }
 
-            function formatPrice(price) {
-                return `${price.toLocaleString('ko-KR')}원`;
-            }
+            function formatPrice(price) { return `${price.toLocaleString('ko-KR')}원`; }
 
             function renderResults(results) {
                 resultsContainer.innerHTML = '';
-                if (results.length === 0) {
-                    noResults.classList.remove('hidden');
-                    return;
-                }
-                noResults.classList.add('hidden');
+                noResults.classList.toggle('hidden', results.length > 0);
+                if (results.length === 0) return;
 
                 const sortValue = sortOptions.value;
-                if (sortValue === 'latest') {
-                    results.sort((a, b) => b.date - a.date);
-                } else if (sortValue === 'price_asc') {
-                    results.sort((a, b) => a.price - b.price);
-                } else if (sortValue === 'price_desc') {
-                    results.sort((a, b) => b.price - a.price);
-                }
+                results.sort((a, b) => {
+                    if (sortValue === 'latest') return b.date - a.date;
+                    if (sortValue === 'price_asc') return a.price - b.price;
+                    if (sortValue === 'price_desc') return b.price - a.price;
+                });
 
                 results.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = `bg-white rounded-lg shadow-sm overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 ${item.sold ? 'opacity-50' : ''}`;
-                    card.innerHTML = `
+                    const cardLink = document.createElement('a');
+                    cardLink.href = platformInfo[item.platform]?.url || '#';
+                    cardLink.target = '_blank';
+                    cardLink.className = `block bg-white rounded-lg shadow-sm overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 ${item.sold ? 'opacity-50' : ''}`;
+
+                    cardLink.innerHTML = `
                         <div class="relative">
                             <img src="${item.imageUrl}" alt="${item.title}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/FFFFFF?text=Image+Not+Found';">
                             ${item.sold ? '<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center"><span class="text-white text-xl font-bold">거래완료</span></div>' : ''}
                         </div>
-                        <div class="p-4">
+                        <div class="p-4 flex flex-col h-full">
                             <h3 class="font-bold text-md truncate">${item.title}</h3>
                             <p class="text-lg font-semibold text-blue-600 my-1">${formatPrice(item.price)}</p>
-                            <div class="text-sm text-gray-500 flex justify-between">
-                                <span>${item.platform}</span>
+                            <div class="text-sm text-gray-500 flex justify-between items-center mt-auto pt-2">
+                                <div class="flex items-center gap-2">
+                                    <img src="${platformInfo[item.platform]?.icon || ''}" class="w-4 h-4 object-contain">
+                                    <span>${item.platform}</span>
+                                </div>
                                 <span>${item.date.toLocaleDateString('ko-KR')}</span>
                             </div>
-                            <a href="javascript:void(0);" onclick="alert('원본 게시글로 이동합니다 (데모)')" class="block w-full text-center mt-3 bg-gray-200 text-gray-800 font-semibold py-2 rounded-md hover:bg-gray-300 transition">
-                                원본 보기
-                            </a>
                         </div>
                     `;
-                    resultsContainer.appendChild(card);
+                    resultsContainer.appendChild(cardLink);
                 });
             }
 
             function performSearch() {
                 const query = searchInput.value.toLowerCase();
                 const statusFilterValue = document.querySelector('input[name="statusFilter"]:checked').value;
+                const minPrice = parseFloat(minPriceInput.value) || 0;
+                const maxPrice = parseFloat(maxPriceInput.value) || Infinity;
+                const dateFilterDays = parseInt(dateFilter.value);
 
                 let results = Object.values(mockData).flat();
 
@@ -333,88 +351,78 @@
                     results = results.filter(item => item.sold);
                 }
 
+                results = results.filter(item => item.price >= minPrice && item.price <= maxPrice);
+
+                if (!isNaN(dateFilterDays)) {
+                    const cutoffDate = new Date();
+                    cutoffDate.setDate(cutoffDate.getDate() - dateFilterDays);
+                    results = results.filter(item => item.date >= cutoffDate);
+                }
+
                 renderResults(results);
             }
 
             function performAnalysis() {
                 const query = analysisInput.value.toLowerCase();
-                const data = Object.keys(mockAnalysis).find(key => query.includes(key.split(" ")[0]));
-                if (data && mockAnalysis[data]) {
-                    renderAnalysis(mockAnalysis[data]);
-                    analysisResults.classList.remove('hidden');
-                    noAnalysisResults.classList.add('hidden');
+                const dataKey = Object.keys(mockAnalysis).find(key => query.includes(key.toLowerCase().split(" ")[0]));
+                const data = dataKey ? mockAnalysis[dataKey] : null;
+
+                analysisResults.classList.toggle('hidden', !data);
+                noAnalysisResults.classList.toggle('hidden', data);
+
+                if (data) {
+                    renderAnalysis(data);
                 } else {
-                    analysisResults.classList.add('hidden');
-                    noAnalysisResults.classList.remove('hidden');
-                    noAnalysisResults.textContent = `'${query}'에 대한 분석 데이터가 없습니다. 'RTX 4080' 또는 '아이패드 에어 5'로 시도해보세요.`;
+                    noAnalysisResults.textContent = `'${query}'에 대한 분석 데이터가 없습니다. 'RTX 4080', '아이패드', '맥북' 등으로 시도해보세요.`;
                 }
             }
 
             function renderAnalysis(data) {
                 const summaryContainer = document.getElementById('price-summary');
                 summaryContainer.innerHTML = `
-                    <div>
-                        <p class="text-sm text-gray-500">신제품 현재가</p>
-                        <p class="text-2xl font-bold text-gray-800">${formatPrice(data.summary.newPrice)}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">현재 중고 시세 (평균)</p>
-                        <p class="text-3xl font-bold text-blue-600">${formatPrice(data.summary.avgPrice)}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">예상 감가율</p>
-                        <p class="text-2xl font-bold text-red-500">${data.summary.depreciation}%</p>
-                    </div>
-                `;
+                    <div><p class="text-sm text-gray-500">신제품 현재가</p><p class="text-2xl font-bold text-gray-800">${formatPrice(data.summary.newPrice)}</p></div>
+                    <div><p class="text-sm text-gray-500">현재 중고 시세 (평균)</p><p class="text-3xl font-bold text-blue-600">${formatPrice(data.summary.avgPrice)}</p></div>
+                    <div><p class="text-sm text-gray-500">예상 감가율</p><p class="text-2xl font-bold text-red-500">${data.summary.depreciation}%</p></div>`;
 
                 if (priceTrendChart) priceTrendChart.destroy();
                 priceTrendChart = new Chart(document.getElementById('priceTrendChart'), {
                     type: 'line',
-                    data: {
-                        labels: data.trend.labels,
-                        datasets: [{
-                            label: '평균 거래가',
-                            data: data.trend.data,
-                            borderColor: '#3B82F6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            fill: true,
-                            tension: 0.3,
-                        }]
-                    },
+                    data: { labels: data.trend.labels, datasets: [{ label: '평균 거래가', data: data.trend.data, borderColor: '#3B82F6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.3 }] },
                     options: { responsive: true, maintainAspectRatio: false }
                 });
 
                 if (salesSpeedChart) salesSpeedChart.destroy();
                 salesSpeedChart = new Chart(document.getElementById('salesSpeedChart'), {
                     type: 'bar',
-                    data: {
-                        labels: data.speed.labels,
-                        datasets: [{
-                            label: '평균 소요 기간 (일)',
-                            data: data.speed.data,
-                            backgroundColor: ['#93C5FD', '#60A5FA', '#3B82F6', '#2563EB'],
-                            borderRadius: 5,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        }
-                    }
+                    data: { labels: data.speed.labels, datasets: [{ label: '평균 소요 기간 (일)', data: data.speed.data, backgroundColor: ['#93C5FD', '#60A5FA', '#3B82F6', '#2563EB'], borderRadius: 5 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
                 });
             }
 
-            navButtons.forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
+            function renderPopularKeywords() {
+                const keywords = ["RTX 4080", "아이패드", "맥북 프로", "닌텐도 스위치", "다이슨 에어랩"];
+                keywords.forEach(keyword => {
+                    const btn = document.createElement('button');
+                    btn.className = 'keyword-btn text-sm bg-blue-100 text-blue-800 py-1 px-3 rounded-full hover:bg-blue-200';
+                    btn.textContent = keyword;
+                    btn.onclick = () => {
+                        searchInput.value = keyword;
+                        performSearch();
+                    };
+                    popularKeywordsContainer.appendChild(btn);
+                });
+            }
+
+            const allFilterElements = [sortOptions, minPriceInput, maxPriceInput, dateFilter, ...statusFilters];
+            allFilterElements.forEach(el => el.addEventListener('change', performSearch));
             searchBtn.addEventListener('click', performSearch);
             searchInput.addEventListener('keyup', e => { if (e.key === 'Enter') performSearch() });
-            sortOptions.addEventListener('change', performSearch);
-            statusFilters.forEach(filter => filter.addEventListener('change', performSearch));
             analysisBtn.addEventListener('click', performAnalysis);
             analysisInput.addEventListener('keyup', e => { if (e.key === 'Enter') performAnalysis() });
+            navButtons.forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
 
             switchView('search');
+            renderPopularKeywords();
             performSearch();
         });
     </script>
