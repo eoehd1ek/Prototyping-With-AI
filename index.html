@@ -57,7 +57,7 @@
     Chosen Palette: Calm Neutrals (Grays, Blue accent)
     Application Structure Plan: A tab-based SPA structure is used to separate user tasks. '통합 검색' is for focused searching. The new '둘러보기' tab is for exploratory browsing by category. '시세 분석' is for market research. This aligns the UI with distinct user intents, improving usability.
     Visualization & Content Choices: 
-    - 통합 검색: Goal: Inform/Compare. Method: Dynamic card list via HTML/JS. Interaction: Keyword search and advanced filters (price, date, status). Justification: For users with a specific item in mind.
+    - 통합 검색: Goal: Inform/Compare. Method: Dynamic card list via HTML/JS. Interaction: Keyword search and advanced filters (price, date, status, platform). Justification: For users with a specific item in mind.
     - 둘러보기: Goal: Explore. Method: Dynamic card list. Interaction: Category filter buttons. Justification: For users who want to browse items without a specific goal.
     - 시세 분석: Goal: Show Change/Compare. Method: Line/Bar Charts (Chart.js/Canvas). Interaction: Search triggers chart update. Justification: For users researching market prices.
     CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. 
@@ -100,7 +100,7 @@
 
                 <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
                     <h3 class="text-lg font-bold mb-4">상세 필터</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">가격 범위 (원)</label>
                             <div class="flex items-center gap-2">
@@ -119,6 +119,23 @@
                                 <option value="7">일주일 이내</option>
                                 <option value="30">한달 이내</option>
                             </select>
+                        </div>
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">거래 플랫폼</label>
+                            <button id="platformFilterBtn"
+                                class="w-full p-2 border rounded-md bg-white text-left flex justify-between items-center">
+                                <span id="platformFilterText">전체</span>
+                                <span>▼</span>
+                            </button>
+                            <div id="platformFilterOptions"
+                                class="hidden absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg p-4 space-y-2">
+                                <label class="flex items-center gap-2"><input type="checkbox" name="platform"
+                                        value="중고나라" class="h-4 w-4 text-blue-600" checked><span>중고나라</span></label>
+                                <label class="flex items-center gap-2"><input type="checkbox" name="platform"
+                                        value="번개장터" class="h-4 w-4 text-blue-600" checked><span>번개장터</span></label>
+                                <label class="flex items-center gap-2"><input type="checkbox" name="platform"
+                                        value="당근마켓" class="h-4 w-4 text-blue-600" checked><span>당근마켓</span></label>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">거래 상태</label>
@@ -265,6 +282,9 @@
             const maxPriceInput = document.getElementById('maxPrice');
             const dateFilter = document.getElementById('dateFilter');
             const popularKeywordsContainer = document.getElementById('popular-keywords');
+            const platformFilterBtn = document.getElementById('platformFilterBtn');
+            const platformFilterOptions = document.getElementById('platformFilterOptions');
+            const platformCheckboxes = document.querySelectorAll('input[name="platform"]');
 
             const browseResultsContainer = document.getElementById('browse-results-container');
             const noBrowseResults = document.getElementById('no-browse-results');
@@ -331,11 +351,16 @@
                 const minPrice = parseFloat(minPriceInput.value) || 0;
                 const maxPrice = parseFloat(maxPriceInput.value) || Infinity;
                 const dateFilterDays = parseInt(dateFilter.value);
+                const selectedPlatforms = Array.from(document.querySelectorAll('input[name="platform"]:checked')).map(cb => cb.value);
 
                 let results = Object.values(mockData).flat();
 
                 if (query) {
                     results = results.filter(item => item.title.toLowerCase().includes(query));
+                }
+
+                if (selectedPlatforms.length > 0) {
+                    results = results.filter(item => selectedPlatforms.includes(item.platform));
                 }
 
                 if (statusFilterValue === 'available') {
@@ -450,8 +475,33 @@
                 });
             }
 
-            const allFilterElements = [sortOptions, minPriceInput, maxPriceInput, dateFilter, ...statusFilters];
+            function updatePlatformFilterText() {
+                const selected = Array.from(document.querySelectorAll('input[name="platform"]:checked')).map(cb => cb.parentElement.textContent.trim());
+                const textElement = document.getElementById('platformFilterText');
+                if (selected.length === platformCheckboxes.length) {
+                    textElement.textContent = '전체';
+                } else if (selected.length > 0) {
+                    textElement.textContent = selected.join(', ');
+                } else {
+                    textElement.textContent = '선택된 플랫폼 없음';
+                }
+            }
+
+            platformFilterBtn.addEventListener('click', () => {
+                platformFilterOptions.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!platformFilterBtn.contains(e.target) && !platformFilterOptions.contains(e.target)) {
+                    platformFilterOptions.classList.add('hidden');
+                }
+            });
+
+            const allFilterElements = [sortOptions, minPriceInput, maxPriceInput, dateFilter, ...statusFilters, ...platformCheckboxes];
             allFilterElements.forEach(el => el.addEventListener('change', performSearch));
+
+            platformCheckboxes.forEach(cb => cb.addEventListener('change', updatePlatformFilterText));
+
             searchBtn.addEventListener('click', performSearch);
             searchInput.addEventListener('keyup', e => { if (e.key === 'Enter') performSearch() });
             analysisBtn.addEventListener('click', performAnalysis);
@@ -462,6 +512,7 @@
             renderPopularKeywords();
             renderCategoryFilters();
             performSearch();
+            updatePlatformFilterText();
         });
     </script>
 </body>
